@@ -24,15 +24,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
  * Why ? Make sure you ask your doubt in the sessions :P
  */
 
-const corsOptions = {
-  origin: ["http://localhost:3000", "https://crm-plus.netlify.app/"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors(corsOptions));
+app.use(cors());
 
 /**
  * DB Connection initialization
