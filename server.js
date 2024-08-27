@@ -3,87 +3,86 @@
  */
 //chakri9182
 //"mongodb+srv://chakravarthy:chakri9182@cluster0.fagef3g.mongodb.net/?retryWrites=true&w=majority
-const serverConfig = require('./configs/server.config');
-const dbConfig = require('./configs/db.config');
-const mongoose = require('mongoose');
-const User = require('./models/user.model');
-const express = require('express');
+const serverConfig = require("./configs/server.config");
+const dbConfig = require("./configs/db.config");
+const mongoose = require("mongoose");
+const User = require("./models/user.model");
+const express = require("express");
 const bcrypt = require("bcryptjs");
 const bodyParser = require("body-parser");
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended :true}));
-
+app.use(bodyParser.urlencoded({ extended: true }));
 
 /**
  * Configuring CORS
  * Current configuration ensures access from everywhere
  * Think twice, while doing the same in the Production.
- * 
- * Why ? Make sure you ask your doubt in the sessions :P 
+ *
+ * Why ? Make sure you ask your doubt in the sessions :P
  */
- app.use(cors());
+
+const corsOptions = {
+  origin: ["http://localhost:3000", "https://crm-plus.netlify.app/"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors(corsOptions));
 
 /**
  * DB Connection initialization
  */
 
-
- mongoose.connect("mongodb+srv://chakravarthy:chakri9182@cluster0.fagef3g.mongodb.net/?retryWrites=true&w=majority");
- const db = mongoose.connection;
- db.on("error", ()=>{
-      console.log("error while connecting to DB");
-  });
-  db.once("open",()=>{
-     console.log("connected to Mongo DB ")
-     init();
-  });
+mongoose.connect(process.env.DB_URL);
+const db = mongoose.connection;
+db.on("error", () => {
+  console.log("error while connecting to DB");
+});
+db.once("open", () => {
+  console.log("connected to Mongo DB ");
+  init();
+});
 
 /**
- * 
- * @returns 
+ *
+ * @returns
  * This method is for the demonstration purpose,
  * ideally one ADMIN user should have been created in the backend
  */
 async function init() {
+  var user = await User.findOne({ userId: "admin" });
 
+  if (user) {
+    console.log("Admin user already present");
+    return;
+  }
 
-    var user = await User.findOne({ userId: "admin" });
-
-    if (user) {
-         console.log("Admin user already present");
-        return;
-    }
-
-    try {
-
-        user = await User.create({
-            name: "Vishwa",
-            userId: "admin", // It should be atleat 16, else will throw error
-            email: "Kankvish@gmail.com",  // If we don't pass this, it will throw the error
-            userType: "ADMIN",
-            password :bcrypt.hashSync("Welcome1", 8) //this field should be hidden from the end user
-
-        });
-        console.log(user);
-
-    } catch (e) {
-        console.log(e.message);
-    }
-
+  try {
+    user = await User.create({
+      name: "Vishwa",
+      userId: "admin", // It should be atleat 16, else will throw error
+      email: "Kankvish@gmail.com", // If we don't pass this, it will throw the error
+      userType: "ADMIN",
+      password: bcrypt.hashSync("Welcome1", 8), //this field should be hidden from the end user
+    });
+    console.log(user);
+  } catch (e) {
+    console.log(e.message);
+  }
 }
-
-
 
 /**
  * importing the routes
  */
-require('./routes/auth.routes')(app);
-require('./routes/user.routes')(app);
-require('./routes/ticket.routes')(app);
+require("./routes/auth.routes")(app);
+require("./routes/user.routes")(app);
+require("./routes/ticket.routes")(app);
 
 app.listen(serverConfig.PORT, () => {
-    console.log(`Application started on the port num : ${serverConfig.PORT}`);
-})
+  console.log(`Application started on the port num : ${serverConfig.PORT}`);
+});
