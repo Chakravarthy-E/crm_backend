@@ -77,6 +77,18 @@ require("./routes/auth.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/ticket.routes")(app);
 
+function pingApp() {
+  https
+    .get("https://crm-backend-0hsv.onrender.com/", (res) => {
+      console.log(`Pinging app: ${res.statusCode}`);
+    })
+    .on("error", (e) => {
+      console.error(`Error pinging app: ${e.message}`);
+    });
+}
+
+setInterval(pingApp, 600000);
+
 app.listen(serverConfig.PORT, () => {
   console.log(`Application started on the port num : ${serverConfig.PORT}`);
 });
